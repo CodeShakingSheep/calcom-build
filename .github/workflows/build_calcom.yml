@@ -16,6 +16,8 @@ jobs:
       NEXTAUTH_SECRET: "dummysecret"
       NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3000"
       NEXTAUTH_URL: "http://localhost:3000"
+      NEXT_TELEMETRY_DISABLED: "1"
+      TURBO_TELEMETRY_DISABLED: "1"
 
     container:
       image: debian:bookworm
