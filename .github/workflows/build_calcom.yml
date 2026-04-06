@@ -105,7 +105,7 @@ jobs:
           echo "DB_PWD=$DB_PWD" >> $GITHUB_ENV
           echo "NEXTAUTH_SECRET=$NEXT_KEY" >> $GITHUB_ENV
 
-      - name: Download calcom
+      - name: Build calcom
         shell: bash
         run: |
           set -euxo pipefail
@@ -139,7 +139,7 @@ jobs:
 
 
           ######################################################################
-          # Build calcom
+          # INSTALL DEPENDENCIES & BUILD
           ######################################################################
           echo "::group::🛠️ Building calcom"
           yarn
@@ -184,7 +184,6 @@ jobs:
         run: |
           echo "::group::📦 Creating final tarball"
           calcom="${{ needs.prepare.outputs.calcom_version }}"
-          cd /var/www
           tar czf "calcom-v${calcom}.tar.gz" calcom
           mv calcom-v*.tar.gz /tmp/
           echo "::endgroup::"
