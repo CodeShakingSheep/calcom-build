@@ -33,7 +33,7 @@ jobs:
 
           YARN_VERSION=$(curl -s https://raw.githubusercontent.com/calcom/cal.com/refs/heads/main/package.json \
             | jq -r '.packageManager | split("@")[1] | split(".")[0]')
-          echo "pnpm_version=$PNPM_VERSION" >> $GITHUB_OUTPUT
+          echo "yarn_version=$YARN_VERSION" >> $GITHUB_OUTPUT
 
       - uses: actions/checkout@v6
 
