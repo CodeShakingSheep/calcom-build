@@ -57,6 +57,7 @@ jobs:
       NODE_ENV: production
       NODE_OPTIONS: "--max_old_space_size=8192"
       COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+      CURL_OPTS: "--fail --location --retry 3 --retry-delay 2"
       CALENDSO_ENCRYPTION_KEY: ${{ secrets.CALENDSO_ENCRYPTION_KEY }}
       DATABASE_URL: "postgresql://calcom:${{ secrets.DB_PWD }}@localhost:5432/calcom"
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
