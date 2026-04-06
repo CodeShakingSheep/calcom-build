@@ -78,9 +78,9 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Install Node.js (LTS)
-        run: |
-          curl -fsSL https://deb.nodesource.com/setup_${{ needs.prepare.outputs.node_version }}.x | bash -
-          apt-get install -y nodejs
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ needs.prepare.outputs.node_version }}
 
       - name: Enable Corepack (Yarn)
         run: |
