@@ -68,25 +68,24 @@ jobs:
       image: debian:bookworm
 
     steps:
-      - name: Install system deps
+
+      - name: Install git for checkout  
         run: |
           apt-get update
-          apt-get install -y curl git build-essential python3
+          apt-get install -y git
+
+      - uses: actions/checkout@v6
 
       - name: Install Node.js (LTS)
-        run: |
-          curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-          apt-get install -y nodejs
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ needs.prepare.outputs.node_version }}
 
       - name: Enable Corepack (Yarn)
-        run: corepack enable
+        run: |
+          corepack enable --install-directory=/usr/local/bin
+          corepack use yarn@${{ needs.prepare.outputs.yarn_version }}
 
-      - name: Checkout cal.com
-        uses: actions/checkout@v4
-        with:
-          repository: calcom/cal.com
-          ref: main
-      
       - name: Generate dynamic keys (masked)
         id: keygen
         run: |
@@ -105,34 +104,91 @@ jobs:
           echo "DB_PWD=$DB_PWD" >> $GITHUB_ENV
           echo "NEXTAUTH_SECRET=$NEXT_KEY" >> $GITHUB_ENV
 
-      - name: Install dependencies (Yarn)
-        run: yarn install --immutable
-
-      - name: Generate Prisma client
-        run: yarn prisma generate
-
-      - name: Build app
-        run: yarn build
-
-      - name: Disable postinstall in CI
+      - name: Download calcom
         run: |
+          set -euxo pipefail
+
+          ######################################################################
+          # DIR STRUCTURE
+          ######################################################################
+          echo "::group::📁 Creating folder structure"
+          install_dir="${{ needs.prepare.outputs.install_dir }}"
+          echo "::endgroup::"
+
+
+          ######################################################################
+          # STATS START
+          ######################################################################
+          echo "::group::⏱️ Starting statistics"
+          date_before=$(date +%s)
+          disk_before=$(df -k / | tail -1 | awk '{print $3}')
+          echo "::endgroup::"
+
+
+          ######################################################################
+          # CALCOM SOURCE
+          ######################################################################
+          echo "::group::📥 Downloading calcom source"
+          curl $CURL_OPTS -o src.tgz \
+            https://github.com/calcom/cal.com/archive/refs/tags/v${{ needs.prepare.outputs.calcom_version }}.tar.gz
+          tar xzf src.tgz --strip-components=1
+          rm src.tgz
+          echo "::endgroup::"
+
+
+          ######################################################################
+          # Build calcom
+          ######################################################################
+          echo "::group::🛠️ Building calcom"
+          yarn
+          yarn prisma generate
+          yarn build
+          echo "::endgroup::"
+
+          ######################################################################
+          # CLEANUP
+          ######################################################################
+          echo "::group::🧹 Cleaning"
           echo "Patching package.json to comment out postinstall..."
           # backup original package.json
           cp package.json package.json.bak
           # comment out the postinstall line
           sed -i 's/"postinstall": "husky install && turbo run post-install"/"postinstall": ""/g' package.json
+          yarn workspaces focus --all --production
+          echo "::endgroup::"
 
-      - name: Prune dev dependencies
-        run: yarn workspaces focus --all --production
+          ######################################################################
+          # STATS END
+          ######################################################################
+          echo "::group::⏱️ Ending statistics"
+          date_after=$(date +%s)
+          disk_after=$(df -k / | tail -1 | awk '{print $3}')
+          dur=$((date_after - date_before))
+          if [ -f /sys/fs/cgroup/memory.peak ]; then
+            peak=$(cat /sys/fs/cgroup/memory.peak)
+          else
+            peak=0
+          fi
+          echo "exec_time=$(printf '%02d:%02d:%02d' $((dur/3600)) $((dur%3600/60)) $((dur%60)))" >> $GITHUB_OUTPUT
+          echo "disk_used=$(awk -v a="$disk_after" -v b="$disk_before" 'BEGIN{ printf "%.2fGB",(a-b)/1024/1024 }')" >> $GITHUB_OUTPUT
+          echo "peak_ram=$(awk -v v="$peak" 'BEGIN{ printf "%.2fGB",v/1024/1024/1024 }')" >> $GITHUB_OUTPUT
+          echo "::endgroup::"
 
-      - name: Prepare artifact
+      ##########################################################################
+      # TAR CREATION
+      ##########################################################################
+
+      - name: 📦 Creating final tarball
         run: |
-          mkdir -p /build
-          cp -r . /build/app
-          tar -czf calcom-bookworm-amd64.tar.gz -C /build app
+          echo "::group::📦 Creating final tarball"
+          calcom="${{ needs.prepare.outputs.calcom_version }}"
+          cd /var/www
+          tar czf "calcom-v${calcom}.tar.gz" calcom
+          mv calcom-v*.tar.gz /tmp/
+          echo "::endgroup::"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: calcom-bookworm-amd64
-          path: calcom-bookworm-amd64.tar.gz
+          name: calcom-v${calcom}.tar.gz
+          path: /tmp/calcom-bookworm-amd64.tar.gz
