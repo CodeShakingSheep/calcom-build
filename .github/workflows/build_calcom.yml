@@ -85,7 +85,6 @@ jobs:
       - name: Enable Corepack (Yarn)
         run: |
           corepack enable --install-directory=/usr/local/bin
-          corepack use yarn@${{ needs.prepare.outputs.yarn_version }}
 
       - name: Generate dynamic keys (masked)
         id: keygen
