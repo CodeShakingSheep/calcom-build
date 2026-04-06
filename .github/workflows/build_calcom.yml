@@ -28,7 +28,7 @@ jobs:
           echo "calcom_version=$CALCOM_VERSION" >> $GITHUB_OUTPUT
 
           NODE_VERSION=$(curl -s https://raw.githubusercontent.com/calcom/cal.com/refs/heads/main/Dockerfile \
-            | sed -nE 's@.*node:([0-9]+\.[0-9]+\.[0-9]+).*@\1@p' | head -n1)
+            | sed -nE 's@.*node:([0-9]+(\.[0-9]){0,2}).*@\1@p' | head -n1)
           echo "node_version=$NODE_VERSION" >> $GITHUB_OUTPUT
 
           YARN_VERSION=$(curl -s https://raw.githubusercontent.com/calcom/cal.com/refs/heads/main/package.json \
