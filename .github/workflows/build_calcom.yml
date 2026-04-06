@@ -17,36 +17,36 @@ jobs:
 
       install_dir:     /var/www/calcom
 
-      steps:
-        - name: Get upstream versions
-          id: get-versions
-          shell: bash
-          run: |
-            set -euo pipefail
-            CALCOM_VERSION=$(curl -sIL https://github.com/calcom/cal.com/releases/latest \
-              | grep -i location | sed -n 's@.*/tag/v\([^"]*\).*@\1@p' | tr -d '\r[:space:]')
-            echo "calcom_version=$CALCOM_VERSION" >> $GITHUB_OUTPUT
+    steps:
+      - name: Get upstream versions
+        id: get-versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          CALCOM_VERSION=$(curl -sIL https://github.com/calcom/cal.com/releases/latest \
+            | grep -i location | sed -n 's@.*/tag/v\([^"]*\).*@\1@p' | tr -d '\r[:space:]')
+          echo "calcom_version=$CALCOM_VERSION" >> $GITHUB_OUTPUT
 
-            NODE_VERSION=$(curl -s https://raw.githubusercontent.com/calcom/cal.com/refs/heads/main/Dockerfile \
-              | sed -nE 's@.*node:([0-9]+\.[0-9]+\.[0-9]+).*@\1@p' | head -n1)
-            echo "node_version=$NODE_VERSION" >> $GITHUB_OUTPUT
+          NODE_VERSION=$(curl -s https://raw.githubusercontent.com/calcom/cal.com/refs/heads/main/Dockerfile \
+            | sed -nE 's@.*node:([0-9]+\.[0-9]+\.[0-9]+).*@\1@p' | head -n1)
+          echo "node_version=$NODE_VERSION" >> $GITHUB_OUTPUT
 
-            YARN_VERSION=$(curl -s https://raw.githubusercontent.com/calcom/cal.com/refs/heads/main/package.json \
-              | jq -r '.packageManager | split("@")[1] | split(".")[0]')
-            echo "pnpm_version=$PNPM_VERSION" >> $GITHUB_OUTPUT
+          YARN_VERSION=$(curl -s https://raw.githubusercontent.com/calcom/cal.com/refs/heads/main/package.json \
+            | jq -r '.packageManager | split("@")[1] | split(".")[0]')
+          echo "pnpm_version=$PNPM_VERSION" >> $GITHUB_OUTPUT
 
-        - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-        - name: Check if release already exists
-          id: check-version
-          shell: bash
-          run: |
-            TAG="calcom-v${{ steps.get-versions.outputs.calcom_version }}"
-            if git ls-remote --exit-code --tags origin "$TAG" ; then
-              echo "should_build=false" >> $GITHUB_OUTPUT
-            else
-              echo "should_build=true" >> $GITHUB_OUTPUT
-            fi
+      - name: Check if release already exists
+        id: check-version
+        shell: bash
+        run: |
+          TAG="calcom-v${{ steps.get-versions.outputs.calcom_version }}"
+          if git ls-remote --exit-code --tags origin "$TAG" ; then
+            echo "should_build=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_build=true" >> $GITHUB_OUTPUT
+          fi
 
   build:
     needs: prepare
