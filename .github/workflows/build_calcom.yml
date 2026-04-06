@@ -13,7 +13,6 @@ jobs:
       NODE_OPTIONS: "--max_old_space_size=8192"
       CALENDSO_ENCRYPTION_KEY: "12345678901234567890123456789012"
       DATABASE_URL: "postgresql://user:pass@localhost:5432/db"
-      HUSKY: "0"
       NEXTAUTH_SECRET: "dummysecret"
       NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3000"
       NEXTAUTH_URL: "http://localhost:3000"
