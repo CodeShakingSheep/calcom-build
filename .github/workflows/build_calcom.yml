@@ -11,9 +11,9 @@ jobs:
     env:
       NODE_ENV: production
       NODE_OPTIONS: "--max_old_space_size=8192"
-      CALENDSO_ENCRYPTION_KEY: "12345678901234567890123456789012"
+      CALENDSO_ENCRYPTION_KEY: ${{ secrets.CALENDSO_ENCRYPTION_KEY }}
       DATABASE_URL: "postgresql://user:pass@localhost:5432/db"
-      NEXTAUTH_SECRET: "dummysecret"
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
       NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3000"
       NEXTAUTH_URL: "http://localhost:3000"
       NEXT_TELEMETRY_DISABLED: "1"
@@ -41,6 +41,13 @@ jobs:
         with:
           repository: calcom/cal.com
           ref: main
+      
+      - name: Generate dynamic keys
+        id: keygen
+        run: |
+          # Random 32-byte key, base64
+          echo "CALENDSO_ENCRYPTION_KEY=$(openssl rand -base64 32)" >> $GITHUB_ENV
+          echo "NEXTAUTH_SECRET=$(openssl rand -base64 32)" >> $GITHUB_ENV
 
       - name: Install dependencies (Yarn)
         run: yarn install --immutable
