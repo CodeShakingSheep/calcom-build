@@ -12,7 +12,7 @@ jobs:
       NODE_ENV: production
       NODE_OPTIONS: "--max_old_space_size=8192"
       CALENDSO_ENCRYPTION_KEY: ${{ secrets.CALENDSO_ENCRYPTION_KEY }}
-      DATABASE_URL: "postgresql://user:pass@localhost:5432/db"
+      DATABASE_URL: "postgresql://calcom:${{ secrets.DB_PWD }}@localhost:5432/calcom"
       NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
       NEXT_PUBLIC_WEBAPP_URL: "http://localhost:3000"
       NEXTAUTH_URL: "http://localhost:3000"
@@ -47,14 +47,17 @@ jobs:
         run: |
           # Generate random 32-byte base64 keys
           CAL_KEY=$(openssl rand -base64 32)
+          DB_PWD=$(openssl rand -base64 32)
           NEXT_KEY=$(openssl rand -base64 32)
 
           # Mask the keys in GitHub Actions logs
           echo "::add-mask::$CAL_KEY"
+          echo "::add-mask::$DB_PWD"
           echo "::add-mask::$NEXT_KEY"
 
           # Export the keys to subsequent steps
           echo "CALENDSO_ENCRYPTION_KEY=$CAL_KEY" >> $GITHUB_ENV
+          echo "DB_PWD=$DB_PWD" >> $GITHUB_ENV
           echo "NEXTAUTH_SECRET=$NEXT_KEY" >> $GITHUB_ENV
 
       - name: Install dependencies (Yarn)
