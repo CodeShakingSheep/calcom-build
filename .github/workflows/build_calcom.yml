@@ -8,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      NODE_OPTIONS: "--max_old_space_size=8192"
 
     container:
       image: debian:bookworm
