@@ -52,6 +52,14 @@ jobs:
       - name: Build app
         run: yarn build
 
+      - name: Disable postinstall in CI
+        run: |
+          echo "Patching package.json to comment out postinstall..."
+          # backup original package.json
+          cp package.json package.json.bak
+          # comment out the postinstall line
+          sed -i 's/"postinstall": "husky install && turbo run post-install"/"postinstall": ""/g' package.json
+
       - name: Prune dev dependencies
         run: yarn workspaces focus --all --production
 
