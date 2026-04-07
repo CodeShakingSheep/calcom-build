@@ -194,5 +194,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: calcom-v${calcom}.tar.gz
-          path: /tmp/calcom-bookworm-amd64.tar.gz
+          name: calcom-v${calcom}
+          path: /tmp/calcom-v*.tar.gz
