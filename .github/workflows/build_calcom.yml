@@ -59,7 +59,7 @@ jobs:
 
     outputs:
       exec_time: ${{ steps.build-calcom.outputs.exec_time }}
-      disc_used: ${{ steps.build-calcom.outputs.disc_used }}
+      disk_used: ${{ steps.build-calcom.outputs.disk_used }}
       peak_ram: ${{ steps.build-calcom.outputs.peak_ram }}
 
     env:
