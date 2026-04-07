@@ -115,6 +115,7 @@ jobs:
           ######################################################################
           echo "::group::📁 Creating folder structure"
           install_dir="${{ needs.prepare.outputs.install_dir }}"
+          mkdir -p "$install_dir"
           echo "::endgroup::"
 
 
@@ -131,6 +132,7 @@ jobs:
           # CALCOM SOURCE
           ######################################################################
           echo "::group::📥 Downloading calcom source"
+          cd "$install_dir"
           curl $CURL_OPTS -o src.tgz \
             https://github.com/calcom/cal.com/archive/refs/tags/v${{ needs.prepare.outputs.calcom_version }}.tar.gz
           tar xzf src.tgz --strip-components=1
@@ -184,6 +186,7 @@ jobs:
         run: |
           echo "::group::📦 Creating final tarball"
           calcom="${{ needs.prepare.outputs.calcom_version }}"
+          cd /var/www
           tar czf "calcom-v${calcom}.tar.gz" calcom
           mv calcom-v*.tar.gz /tmp/
           echo "::endgroup::"
