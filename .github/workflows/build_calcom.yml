@@ -26,8 +26,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          CALCOM_VERSION=$(curl -sIL https://github.com/calcom/cal.com/releases/latest \
-            | grep -i location | sed -n 's@.*/tag/v\([^"]*\).*@\1@p' | tr -d '\r[:space:]')
+          CALCOM_VERSION="6.0.6"
           echo "calcom_version=$CALCOM_VERSION" >> $GITHUB_OUTPUT
 
           NODE_VERSION=$(curl -s https://raw.githubusercontent.com/calcom/cal.com/refs/heads/main/Dockerfile \
